@@ -61,7 +61,16 @@ class _MyHomePageState extends State<MyHomePage> {
       _predict();
     });
   }
+  //to get image from camera
+  Future getImageFromCam() async {
+    final pickedFile = await picker.getImage(source: ImageSource.camera);
+    setState(() {
+      _image = File(pickedFile!.path);
+      _imageWidget = Image.file(_image!);
 
+      _predict();
+    });
+  }
   void _predict() async {
     img.Image imageInput = img.decodeImage(_image!.readAsBytesSync())!;
     var pred = _classifier.predict(imageInput);
@@ -82,39 +91,65 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           Center(
             child: _image == null
-                ? Text('No image selected.')
+                ?
+              Text('Choose an Image')
                 : Container(
-                    constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height / 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(),
-                    ),
-                    child: _imageWidget,
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
+                  decoration: BoxDecoration(
+                    border: Border.all(),
+                  ),
+                  child: _imageWidget,
                   ),
           ),
           SizedBox(
             height: 36,
           ),
           Text(
-            category != null ? category!.label : '',
+            category != null ? category!.label : _image==null?'':'Unable to Detect',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
           SizedBox(
             height: 8,
           ),
-          // Text(
-          //   category != null
-          //       ? 'Confidence: ${category!.score.toStringAsFixed(3)}'
-          //       : '',
-          //   style: TextStyle(fontSize: 16),
-          // ),
+          Text(
+            category != null
+                ? 'Confidence: ${(category!.score*100).toStringAsFixed(3)}%'
+                : '',
+            style: TextStyle(fontSize: 16),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            child: Text('Choose from existing pictures'),
+            onPressed: getImage,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          ElevatedButton(
+            child:Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/cam.png',
+                  height: 40,
+                  width: 40,
+                  //fit: BoxFit.contain,
+                ),
+                SizedBox(width: 10),
+                Text('Take a picture')
+              ]
+            ),
+
+            onPressed: getImageFromCam,
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: getImage,
         tooltip: 'Pick Image',
         child: Icon(Icons.add_a_photo),
-      ),
+      ),*/
     );
   }
 }
